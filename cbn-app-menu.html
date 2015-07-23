@@ -195,10 +195,7 @@ For router integration, you must provide an object instance with the following s
 				
 				// enhance menu items to use the router for navigation
 				this._menu.setAttribute('valueAttr', this.valueAttr);
-				var items = this.items;
-				for (i=0; i<items.length; i++) {
-					this._enhanceMenuItem(items[i]);
-				}
+				this._enhanceChildren();
 				
 				// if we have an initial route, set it now
 				if (this._initialRoute) {
@@ -214,12 +211,30 @@ For router integration, you must provide an object instance with the following s
 			},
 			
 			/**
+			 * Listens for DOM mutation events and enhances any new children that appear.
+			 * 
+			 * @private
+			 */
+			_enhanceChildren: function() {
+				var items = this.items;
+				for (i = 0; i < items.length; i++) {
+					this._enhanceMenuItem(items[i]);
+				}
+				
+				// listen again
+				this.onMutation(this, this._enhanceChildren);
+			},
+			
+			/**
 			 * Enhances a menu item with cbn-app-menu functionality.
 			 * 
 			 * @private
 			 * @param {HTMLElement} item The HTML element of the item to be enhanced.
 			 */
 			_enhanceMenuItem: function(item) {
+				/** @namespace item._menuEnhanced */
+				if (item._menuEnhanced)
+					return;
 				if (this._isSubMenu(item)) {
 					item.setAttribute('valueAttr', this.valueAttr);
 					item.addEventListener('tap', this._subMenuClick.bind(this));
@@ -227,6 +242,7 @@ For router integration, you must provide an object instance with the following s
 				} else {
 					item.addEventListener('tap', this._menuItemClick.bind(this));
 				}
+				item._menuEnhanced = true;
 			},
 			
 			/**
