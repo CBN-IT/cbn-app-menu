@@ -73,7 +73,7 @@ For router integration, you must provide an object instance with the following s
 				
 				/**
 				 * The name of the value attribute to use for storing the URL (route sub-path).
-				 * 
+				 *
 				 * @attribute valueAttr
 				 * @type {String}
 				 * @default 'href'
@@ -82,7 +82,7 @@ For router integration, you must provide an object instance with the following s
 				
 				/**
 				 * The attribute to use to enable exact route matching.
-				 * 
+				 *
 				 * @attribute exactMatchAttr
 				 * @type {String}
 				 * @default 'exact-match'
@@ -91,7 +91,7 @@ For router integration, you must provide an object instance with the following s
 				
 				/**
 				 * Reference to the adapter that integrates this menu with the app's routing system.
-				 * 
+				 *
 				 * @type {Object}
 				 */
 				routerAdapter: null
@@ -100,7 +100,7 @@ For router integration, you must provide an object instance with the following s
 			
 			/**
 			 * Stores the reference to the child `core-menu`.
-			 * 
+			 *
 			 * @private
 			 * @type {HTMLElement}
 			 */
@@ -108,7 +108,7 @@ For router integration, you must provide an object instance with the following s
 			
 			/**
 			 * Stores a list with all selected shortcut items.
-			 * 
+			 *
 			 * @private
 			 * @type {HTMLElement[]}
 			 */
@@ -120,24 +120,24 @@ For router integration, you must provide an object instance with the following s
 			_selectedMenuItem: null,
 			
 			/**
-			 * Used to initialize the menu (in case {@link #_routeChanged} handler is called before {@link #domReady}).
+			 * Stores the last (also the current) route.
 			 * @type {String}
 			 */
-			_initialRoute: '',
+			_lastRoute: '',
 			
 			
 			// API methods:
 			
 			/**
 			 * An array with all menu items (the elements that match the {@link #itemSelector}).
-			 * 
+			 *
 			 * @type {[HTMLElement]}
 			 */
 			get items() {
 				var arr = [];
 				if (!this._menu) return arr;
 				var elements = this._menu.querySelectorAll(this.itemSelector);
-				for (var i = elements.length; i--; i>=0) {
+				for (var i = elements.length; i--; i >= 0) {
 					arr.unshift(elements[i]); // faster than Array.push
 				}
 				return arr;
@@ -146,21 +146,21 @@ For router integration, you must provide an object instance with the following s
 			/**
 			 * Selects the next menu item / shortcut.
 			 */
-			selectNext: function() {
+			selectNext: function () {
 				this._setSelectedItemRelative(1);
 			},
 			
 			/**
 			 * Selects the previous menu item / shortcut.
 			 */
-			selectPrevious: function() {
+			selectPrevious: function () {
 				this._setSelectedItemRelative(-1);
 			},
 			
 			/**
 			 * Navigates to the currently selected item when the user presses the Enter key.
 			 */
-			navigateSelected: function() {
+			navigateSelected: function () {
 				if (!this._selectedMenuItem)
 					return;
 				
@@ -174,16 +174,14 @@ For router integration, you must provide an object instance with the following s
 			/**
 			 * Initializes properties.
 			 */
-			ready: function() {
+			ready: function () {
 				this._selectedShortcuts = [];
 			},
 			
 			/**
 			 * Called when the element is fully loaded.
 			 */
-			domReady: function() {
-				var i;
-				
+			domReady: function () {
 				this._menu = this.querySelector('core-menu');
 				if (!this._menu) {
 					console.error('`cbn-app-menu`: no core-menu defined!');
@@ -195,30 +193,32 @@ For router integration, you must provide an object instance with the following s
 				
 				// enhance menu items to use the router for navigation
 				this._menu.setAttribute('valueAttr', this.valueAttr);
-				this._enhanceChildren();
 				
-				// if we have an initial route, set it now
-				if (this._initialRoute) {
-					this._routeChanged(this._initialRoute);
-				}
+				this._enhanceChildren();
 			},
 			
 			/**
 			 * Called when the {@link #routerAdapter} is set.
 			 */
-			routerAdapterChanged: function() {
+			routerAdapterChanged: function () {
 				this.routerAdapter.subscribe(this._routeChanged.bind(this));
 			},
 			
 			/**
 			 * Listens for DOM mutation events and enhances any new children that appear.
-			 * 
+			 *
 			 * @private
 			 */
-			_enhanceChildren: function() {
+			_enhanceChildren: function () {
 				var items = this.items;
-				for (i = 0; i < items.length; i++) {
+				for (var i = 0; i < items.length; i++) {
 					this._enhanceMenuItem(items[i]);
+				}
+				
+				// re-try to set the current route
+				if (this._lastRoute && items.length) {
+					this._routeChanged(this._lastRoute);
+					this._lastRoute = '';
 				}
 				
 				// listen again
@@ -227,11 +227,11 @@ For router integration, you must provide an object instance with the following s
 			
 			/**
 			 * Enhances a menu item with cbn-app-menu functionality.
-			 * 
+			 *
 			 * @private
 			 * @param {HTMLElement} item The HTML element of the item to be enhanced.
 			 */
-			_enhanceMenuItem: function(item) {
+			_enhanceMenuItem: function (item) {
 				/** @namespace item._menuEnhanced */
 				if (item._menuEnhanced)
 					return;
@@ -247,14 +247,15 @@ For router integration, you must provide an object instance with the following s
 			
 			/**
 			 * Handles route navigation events.
-			 * 
+			 *
 			 * @private
 			 * @param {String} path The new router path.
 			 */
-			_routeChanged: function(path) {
+			_routeChanged: function (path) {
+				this._lastRoute = path;
+				
 				if (!this._menu) {
-					// the cbn-app-menu was not initialized yet; store the initial route and set it later
-					this._initialRoute = path;
+					// the cbn-app-menu was not initialized yet; store the current route and set it later
 					return;
 				}
 				
@@ -265,18 +266,18 @@ For router integration, you must provide an object instance with the following s
 					return;
 				}
 				
-				for (var i=0; i<items.length; i++) {
+				for (var i = 0; i < items.length; i++) {
 					this._selectMenuItem(items[i]);
 				}
 			},
 			
 			/**
 			 * Captures the focus for all children and refocuses to the cbn-app-menu instead (required for a11y keys).
-			 * 
+			 *
 			 * @private
 			 * @param {Event} event The captured focus event.
 			 */
-			_captureFocus: function(event) {
+			_captureFocus: function (event) {
 				if (event.target != this) {
 					event.preventDefault();
 					event.stopPropagation();
@@ -286,11 +287,11 @@ For router integration, you must provide an object instance with the following s
 			
 			/**
 			 * Menu item click handler.
-			 * 
+			 *
 			 * @private
 			 * @param {Event} event The click event that was received.
 			 */
-			_menuItemClick: function(event) {
+			_menuItemClick: function (event) {
 				if (event.target != event.currentTarget) {
 					event.preventDefault();
 					event.stopPropagation();
@@ -310,11 +311,11 @@ For router integration, you must provide an object instance with the following s
 			/**
 			 * Sub-menu click handler.
 			 * Toggles the sub-menu (opens if closed, closes if open).
-			 * 
+			 *
 			 * @private
 			 * @param {Event} event The click event that was received.
 			 */
-			_subMenuClick: function(event) {
+			_subMenuClick: function (event) {
 				if (event.target != event.currentTarget) {
 					event.preventDefault();
 					event.stopPropagation();
@@ -322,7 +323,7 @@ For router integration, you must provide an object instance with the following s
 				}
 				
 				var items = event.target.querySelectorAll(this.itemSelector);
-				for (var i=0; i<items.length; i++) {
+				for (var i = 0; i < items.length; i++) {
 					// find the first submenu item with the same target and click it
 					var selectValue = items[i].getAttribute(this.valueAttr);
 					if (selectValue == event.target.getAttribute(this.valueAttr) && !this._isShortcut(items[i])) {
@@ -338,22 +339,22 @@ For router integration, you must provide an object instance with the following s
 			
 			/**
 			 * Finds the menu item(s) to open for the given route path.
-			 * 
-			 * It uses prefix-based matching (i.e. for example, will select all items that are a prefix of the current 
-			 * route, unless they have the {@link #exactMatchAttr} set: it will only choose those that are an exact match 
+			 *
+			 * It uses prefix-based matching (i.e. for example, will select all items that are a prefix of the current
+			 * route, unless they have the {@link #exactMatchAttr} set: it will only choose those that are an exact match
 			 * of the route).
 			 * For shortcuts, it always uses exact matching.
-			 * 
+			 *
 			 * @private
 			 * @param {String} path The path string for the current route.
 			 * @return {HTMLElement[]} Reference to the menu items found, null if none matched.
 			 */
-			_getItemsForPath: function(path) {
+			_getItemsForPath: function (path) {
 				var foundLen = 0, found = null; // for the main item
 				var foundItems = []; // contains all shortcuts found
 				var items = this.items;
-				for (var i=0; i<items.length; i++) {
-					if (this._isSubMenu(items[i])) 
+				for (var i = 0; i < items.length; i++) {
+					if (this._isSubMenu(items[i]))
 						continue; // ignore submenus
 					var selectValue = items[i].getAttribute(this.valueAttr);
 					if (this._isShortcut(items[i])) {
@@ -381,13 +382,13 @@ For router integration, you must provide an object instance with the following s
 			 * @private
 			 * @param {int} relPos The relative position of the item to select.
 			 */
-			_setSelectedItemRelative: function(relPos) {
+			_setSelectedItemRelative: function (relPos) {
 				var items = this.items;
 				var newPos;
 				if (!items.length) {
 					this._selectedMenuItem = null;
 				} else if (!this._selectedMenuItem) {
-					this._selectedMenuItem = items[(relPos > 0 ? 0 : items.length-1)];
+					this._selectedMenuItem = items[(relPos > 0 ? 0 : items.length - 1)];
 				} else {
 					var found = false;
 					for (var i = 0; i < items.length; i++) {
@@ -400,7 +401,7 @@ For router integration, you must provide an object instance with the following s
 						newPos = (relPos > 0 ? (found + relPos) : (items.length + found + relPos) ) % items.length;
 						this._selectedMenuItem = items[newPos];
 					} else {
-						this._selectedMenuItem = items[(relPos > 0 ? 0 : items.length-1)];
+						this._selectedMenuItem = items[(relPos > 0 ? 0 : items.length - 1)];
 					}
 				}
 				if (this._selectedMenuItem) {
@@ -411,11 +412,11 @@ For router integration, you must provide an object instance with the following s
 			
 			/**
 			 * Opens up a menu item or shortcut (and all parent menus).
-			 * 
+			 *
 			 * @private
 			 * @param {HTMLElement} item The menu item to select.
 			 */
-			_selectMenuItem: function(item) {
+			_selectMenuItem: function (item) {
 				this._selectedMenuItem = item;
 				if (this._isShortcut(item)) {
 					item.className = item.className.replace(/\s*\bselected\b/i, '');
@@ -444,8 +445,8 @@ For router integration, you must provide an object instance with the following s
 			 * Deselects all shortcut items.
 			 * @private
 			 */
-			_deselectShortcuts: function() {
-				for (var i=0; i<this._selectedShortcuts.length; i++) {
+			_deselectShortcuts: function () {
+				for (var i = 0; i < this._selectedShortcuts.length; i++) {
 					var item = this._selectedShortcuts[i];
 					item.className = item.className.replace(/\s*\bselected\b/i, '');
 				}
@@ -454,21 +455,21 @@ For router integration, you must provide an object instance with the following s
 			
 			/**
 			 * Checks if the specified item is a submenu.
-			 * 
+			 *
 			 * @private
 			 * @param {HTMLElement} item The item to check.
 			 */
-			_isSubMenu: function(item) {
+			_isSubMenu: function (item) {
 				return item.tagName == 'CORE-SUBMENU' || item.tagName == 'CORE-MENU';
 			},
 			
 			/**
 			 * Checks if the specified item is a shortcut.
-			 * 
+			 *
 			 * @private
 			 * @param {HTMLElement} item The item to check.
 			 */
-			_isShortcut: function(item) {
+			_isShortcut: function (item) {
 				return !!item.className.match(/\bshortcut\b/i);
 			}
 			
