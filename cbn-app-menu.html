@@ -291,6 +291,11 @@ For router integration, you must provide an object instance with the following s
 			 * @param {Event} event The click event that was received.
 			 */
 			_menuItemClick: function(event) {
+				if (event.target != event.currentTarget) {
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				}
 				var item = event.target;
 				if (this.routerAdapter)
 					this.routerAdapter.go(item.getAttribute(this.valueAttr));
