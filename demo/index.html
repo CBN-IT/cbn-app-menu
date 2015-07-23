@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Material Demo App</title>
+	<meta name="description" content="" />
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no" />
+	
+	<script src="../../webcomponentsjs/webcomponents.js"></script>
+	
+	<link rel="import" href="include/common.html" />
+	
+	<link rel="stylesheet" href="css/app.css" />
+	<link rel="stylesheet" href="css/app-menu.css" />
+	<link rel="stylesheet" href="css/common.css" />
+	
+</head>
+<body unresolved fullbleed layout vertical>
+
+<template id="app" is="auto-binding">
+	
+	<core-header-panel flex>
+		<core-toolbar id="appTopBar">
+			<core-icon-button icon="menu"></core-icon-button>
+			<div flex>Material App</div>
+		</core-toolbar>
+		
+		<core-drawer-panel drawerWidth="230px" flex>
+			
+			<div drawer id="appMenuContainer">
+				
+				<cbn-app-menu valueAttr="href" routerAdapter="{{appRouterAdapter}}">
+					<core-menu class="app-menu">
+						<div class="caption">Main Menu</div>
+						<core-item href="/" class="menu-item" icon="image:image" label="Home"></core-item>
+						
+						<div class="caption">Objects</div>
+						
+						<core-submenu href="/users" icon="image:image" label="Users">
+							<paper-fab href="/users/add" class="item-content shortcut" icon="add"></paper-fab>
+							
+							<core-item href="/users" class="submenu-item" label="Display"></core-item>
+							<core-item href="/users/add" class="submenu-item" label="Add"></core-item>
+							<core-item href="/users/export" class="submenu-item" label="Export"></core-item>
+						</core-submenu>
+						
+						<core-item href="/cats" class="menu-item" icon="image:image" label="Cats">
+							<paper-fab href="/cats/add" class="shortcut" icon="add"></paper-fab>
+						</core-item>
+					</core-menu>
+				</cbn-app-menu>
+				
+			</div>
+			
+			<div main id="appMainContainer">
+				
+				<!-- Application route-page mappings -->
+				<app-router init="manual" mode="hash" trailingSlash="ignore">
+					
+					<app-route path="/" element="app-page-dummy"></app-route>
+					
+					<app-route path="/users" element="app-page-users"></app-route>
+					<app-route path="/users/add" element="app-page-users-add"></app-route>
+					<app-route path="/users/export" element="app-page-users"></app-route>
+					
+					<app-route path="/cats" element="app-page-dummy"></app-route>
+					<app-route path="/cats/add" element="app-page-dummy"></app-route>
+					
+					<!-- Default route - redirect to home page -->
+					<app-route path="*" redirect="/"></app-route>
+					
+				</app-router>
+				
+			</div>
+			
+		</core-drawer-panel>
+	</core-header-panel>
+	
+</template>
+
+<script src="app.js"></script>
+
+</body>
+</html>

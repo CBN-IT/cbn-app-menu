@@ -1,0 +1,41 @@
+<link rel="import" href="../../../polymer/polymer.html">
+
+<polymer-element name="app-page-users-add">
+	<template>
+		<link rel="stylesheet" href="../css/common.css" />
+		<style>
+			:host { display: block; }
+		</style>
+		
+		<div class="content-box">
+			<h1>Add user</h1>
+		</div>
+		
+		<div class="content-box">
+			<cbn-form action="">
+				<core-ajax ></core-ajax>
+				
+				<cbn-dynamic-form config="{{}}"></cbn-dynamic-form>
+				
+			</cbn-form>
+		</div>
+		
+	</template>
+	
+	<script>
+		Polymer('app-page-users-add', {
+			
+			publish: {
+				
+			},
+			
+			/**
+			 * Called when the element is fully loaded.
+			 */
+			domReady: function() {
+				
+			}
+			
+		});
+	</script>
+</polymer-element>

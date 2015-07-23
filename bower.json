@@ -1,0 +1,17 @@
+{
+    "name": "cbn-app-menu",
+    "version": "0.1.0",
+    "dependencies": {
+        "polymer": "Polymer/polymer#^0.5",
+        "core-menu": "Polymer/core-menu#^0.5",
+        "core-item": "Polymer/core-item#^0.5",
+        "core-a11y-keys": "Polymer/core-a11y-keys#^0.5"
+    },
+    "devDependencies": {
+        "core-component-page": "Polymer/core-component-page#^0.5",
+        "web-component-tester": "Polymer/web-component-tester",
+        "core-elements": "Polymer/core-elements#^0.5",
+        "paper-elements": "Polymer/paper-elements#^0.5",
+        "app-router": "~2.6.1"
+    }
+}

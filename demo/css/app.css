@@ -1,0 +1,25 @@
+
+body {
+	font-family: 'Roboto','Droid Sans',Tahoma,Arial,sans-serif;
+	font-size: 14px;
+	font-weight: normal;
+	color: #222;
+}
+
+/* App Layout */
+
+#appTopBar {
+	background: #4A89DC;
+	color: #FFFFFF;
+}
+
+#appMenuContainer {
+	box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Main Content */
+
+#appMainContainer {
+	background: #F3F5F9;
+	padding: 1em;
+}
