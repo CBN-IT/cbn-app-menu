@@ -1,478 +1,107 @@
 <!--
-Enhances the `core-menu` with route support and better sub-menu behavior:
-
-- when a sub-menu is selected, it automatically selects the first sub-item;
-- support for shortcut items (non menu item elements that have menu item behavior);
-- integration with any routing system (you must provide an adapter object).
-
-In order to use it, you must decorate the main core-menu as content:
-```
-<cbn-app-menu valueAttr="href">
-	<core-menu>
-		<core-item href="/" label="Home"></core-item>
-		<core-item href="/users" label="Users">
-			<paper-fab href="/users/add" class="shortcut" icon="add"></paper-fab>
-		</core-item>
-	</core-menu>
-</cbn-app-menu>
-```
-All children menu item elements will be automatically enhanced (with click handlers added and the required attributes 
-set).
-
-For router integration, you must provide an object instance with the following signature:
-```javascript
-	RouterAdapter = {
-		/**
-		 * Adds a subscriber to be notified when the route is changed.
-		 * @param callback The callback function to call when the route changes.
-		 */
-		subscribe: function (callback) { /* ... */ },
-		
-		/**
-		 * Navigates to the specified path.
-		 * @param path The path.
-		 */
-		go: function (path) { /* ... */ }
-	}
-```
-
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../core-menu/core-menu.html">
-<link rel="import" href="../core-menu/core-submenu.html">
-<link rel="import" href="../core-item/core-item.html">
-<link rel="import" href="../core-a11y-keys/core-a11y-keys.html">
+<link rel="import" href="../iron-menu-behavior/iron-menu-behavior.html">
+<link rel="import" href="../paper-styles/paper-styles.html">
+<link rel="import" href="../iron-flex-layout/classes/iron-flex-layout.html">
 
-<polymer-element name="cbn-app-menu" tabindex="1">
-	<template>
-		<style>
-			:host {
-				display: block;
-				outline: none;
-			}
-		</style>
-		
-		<core-a11y-keys target="{{}}" keys="up" on-keys-pressed="{{selectPrevious}}"></core-a11y-keys>
-		<core-a11y-keys target="{{}}" keys="down" on-keys-pressed="{{selectNext}}"></core-a11y-keys>
-		<core-a11y-keys target="{{}}" keys="enter" on-keys-pressed="{{navigateSelected}}"></core-a11y-keys>
-		
-		<content></content>
-	</template>
-	
-	<script>
-		//noinspection JSUnusedGlobalSymbols
-		Polymer('cbn-app-menu', {
-			
-			publish: {
-				
-				/**
-				 * The selectors for the menu item components to enhance.
-				 */
-				itemSelector: 'core-item, core-submenu, paper-item, .menu-item, .shortcut',
-				
-				/**
-				 * The name of the value attribute to use for storing the URL (route sub-path).
-				 *
-				 * @attribute valueAttr
-				 * @type {String}
-				 * @default 'href'
-				 */
-				valueAttr: 'href',
-				
-				/**
-				 * The attribute to use to enable exact route matching.
-				 *
-				 * @attribute exactMatchAttr
-				 * @type {String}
-				 * @default 'exact-match'
-				 */
-				exactMatchAttr: 'exact-match',
-				
-				/**
-				 * Reference to the adapter that integrates this menu with the app's routing system.
-				 *
-				 * @type {Object}
-				 */
-				routerAdapter: null
-				
-			},
-			
-			/**
-			 * Stores the reference to the child `core-menu`.
-			 *
-			 * @private
-			 * @type {HTMLElement}
-			 */
-			_menu: null,
-			
-			/**
-			 * Stores a list with all selected shortcut items.
-			 *
-			 * @private
-			 * @type {HTMLElement[]}
-			 */
-			_selectedShortcuts: null,
-			
-			/**
-			 * Stores the reference to the currently selected item.
-			 */
-			_selectedMenuItem: null,
-			
-			/**
-			 * Stores the last (also the current) route.
-			 * @type {String}
-			 */
-			_lastRoute: '',
-			
-			
-			// API methods:
-			
-			/**
-			 * An array with all menu items (the elements that match the {@link #itemSelector}).
-			 *
-			 * @type {[HTMLElement]}
-			 */
-			get items() {
-				var arr = [];
-				if (!this._menu) return arr;
-				var elements = this._menu.querySelectorAll(this.itemSelector);
-				for (var i = elements.length; i--; i >= 0) {
-					arr.unshift(elements[i]); // faster than Array.push
-				}
-				return arr;
-			},
-			
-			/**
-			 * Selects the next menu item / shortcut.
-			 */
-			selectNext: function () {
-				this._setSelectedItemRelative(1);
-			},
-			
-			/**
-			 * Selects the previous menu item / shortcut.
-			 */
-			selectPrevious: function () {
-				this._setSelectedItemRelative(-1);
-			},
-			
-			/**
-			 * Navigates to the currently selected item when the user presses the Enter key.
-			 */
-			navigateSelected: function () {
-				if (!this._selectedMenuItem)
-					return;
-				
-				if (this.routerAdapter)
-					this.routerAdapter.go(this._selectedMenuItem.getAttribute(this.valueAttr));
-				this._selectMenuItem(this._selectedMenuItem);
-			},
-			
-			// Internal methods:
-			
-			/**
-			 * Initializes properties.
-			 */
-			ready: function () {
-				this._selectedShortcuts = [];
-			},
-			
-			/**
-			 * Called when the element is fully loaded.
-			 */
-			domReady: function () {
-				this._menu = this.querySelector('core-menu');
-				if (!this._menu) {
-					console.error('`cbn-app-menu`: no core-menu defined!');
-					return;
-				}
-				
-				// capture all focus ;) 
-				this.addEventListener('focus', this._captureFocus.bind(this), true);
-				
-				// enhance menu items to use the router for navigation
-				this._menu.setAttribute('valueAttr', this.valueAttr);
-				
-				this._enhanceChildren();
-			},
-			
-			/**
-			 * Called when the {@link #routerAdapter} is set.
-			 */
-			routerAdapterChanged: function () {
-				this.routerAdapter.subscribe(this._routeChanged.bind(this));
-			},
-			
-			/**
-			 * Listens for DOM mutation events and enhances any new children that appear.
-			 *
-			 * @private
-			 */
-			_enhanceChildren: function () {
-				var items = this.items;
-				for (var i = 0; i < items.length; i++) {
-					this._enhanceMenuItem(items[i]);
-				}
-				
-				// re-try to set the current route
-				if (this._lastRoute && items.length) {
-					this._routeChanged(this._lastRoute);
-					this._lastRoute = '';
-				}
-				
-				// listen again
-				this.onMutation(this, this._enhanceChildren);
-			},
-			
-			/**
-			 * Enhances a menu item with cbn-app-menu functionality.
-			 *
-			 * @private
-			 * @param {HTMLElement} item The HTML element of the item to be enhanced.
-			 */
-			_enhanceMenuItem: function (item) {
-				/** @namespace item._menuEnhanced */
-				if (item._menuEnhanced)
-					return;
-				if (this._isSubMenu(item)) {
-					item.setAttribute('valueAttr', this.valueAttr);
-					item.addEventListener('tap', this._subMenuClick.bind(this));
-					
-				} else {
-					item.addEventListener('tap', this._menuItemClick.bind(this));
-				}
-				item._menuEnhanced = true;
-			},
-			
-			/**
-			 * Handles route navigation events.
-			 *
-			 * @private
-			 * @param {String} path The new router path.
-			 */
-			_routeChanged: function (path) {
-				this._lastRoute = path;
-				
-				if (!this._menu) {
-					// the cbn-app-menu was not initialized yet; store the current route and set it later
-					return;
-				}
-				
-				this._deselectShortcuts();
-				var items = this._getItemsForPath(path);
-				if (!items.length) {
-					this._menu.selected = '';
-					return;
-				}
-				
-				for (var i = 0; i < items.length; i++) {
-					this._selectMenuItem(items[i]);
-				}
-			},
-			
-			/**
-			 * Captures the focus for all children and refocuses to the cbn-app-menu instead (required for a11y keys).
-			 *
-			 * @private
-			 * @param {Event} event The captured focus event.
-			 */
-			_captureFocus: function (event) {
-				if (event.target != this) {
-					event.preventDefault();
-					event.stopPropagation();
-					this.focus();
-				}
-			},
-			
-			/**
-			 * Menu item click handler.
-			 *
-			 * @private
-			 * @param {Event} event The click event that was received.
-			 */
-			_menuItemClick: function (event) {
-				if (event.target != event.currentTarget) {
-					event.preventDefault();
-					event.stopPropagation();
-					return;
-				}
-				var item = event.target;
-				if (this.routerAdapter)
-					this.routerAdapter.go(item.getAttribute(this.valueAttr));
-				this._selectMenuItem(item);
-				
-				if (this._isShortcut(item)) {
-					event.preventDefault();
-					event.stopPropagation();
-				}
-			},
-			
-			/**
-			 * Sub-menu click handler.
-			 * Toggles the sub-menu (opens if closed, closes if open).
-			 *
-			 * @private
-			 * @param {Event} event The click event that was received.
-			 */
-			_subMenuClick: function (event) {
-				if (event.target != event.currentTarget) {
-					event.preventDefault();
-					event.stopPropagation();
-					return;
-				}
-				
-				var items = event.target.querySelectorAll(this.itemSelector);
-				for (var i = 0; i < items.length; i++) {
-					// find the first submenu item with the same target and click it
-					var selectValue = items[i].getAttribute(this.valueAttr);
-					if (selectValue == event.target.getAttribute(this.valueAttr) && !this._isShortcut(items[i])) {
-						if (this.routerAdapter)
-							this.routerAdapter.go(items[i].getAttribute(this.valueAttr));
-						this._selectMenuItem(items[i]);
-						event.preventDefault();
-						event.stopPropagation();
-						break;
-					}
-				}
-			},
-			
-			/**
-			 * Finds the menu item(s) to open for the given route path.
-			 *
-			 * It uses prefix-based matching (i.e. for example, will select all items that are a prefix of the current
-			 * route, unless they have the {@link #exactMatchAttr} set: it will only choose those that are an exact match
-			 * of the route).
-			 * For shortcuts, it always uses exact matching.
-			 *
-			 * @private
-			 * @param {String} path The path string for the current route.
-			 * @return {HTMLElement[]} Reference to the menu items found, null if none matched.
-			 */
-			_getItemsForPath: function (path) {
-				var foundLen = 0, found = null; // for the main item
-				var foundItems = []; // contains all shortcuts found
-				var items = this.items;
-				for (var i = 0; i < items.length; i++) {
-					if (this._isSubMenu(items[i]))
-						continue; // ignore submenus
-					var selectValue = items[i].getAttribute(this.valueAttr);
-					if (this._isShortcut(items[i])) {
-						if (path == selectValue) {
-							foundItems.push(items[i]);
-						}
-					} else if (items[i].hasAttribute(this.exactMatchAttr)) {
-						if (path == selectValue) {
-							found = items[i];
-						}
-					} else if (selectValue && path.indexOf(selectValue) >= 0 && selectValue.length > foundLen) {
-						// find the element with the largest path
-						foundLen = selectValue.length;
-						found = items[i];
-					}
-				}
-				if (found)
-					foundItems.push(found);
-				
-				return foundItems;
-			},
-			
-			/**
-			 * Selects a new item relative to {@link #_selectedMenuItem}.
-			 * @private
-			 * @param {int} relPos The relative position of the item to select.
-			 */
-			_setSelectedItemRelative: function (relPos) {
-				var items = this.items;
-				var newPos;
-				if (!items.length) {
-					this._selectedMenuItem = null;
-				} else if (!this._selectedMenuItem) {
-					this._selectedMenuItem = items[(relPos > 0 ? 0 : items.length - 1)];
-				} else {
-					var found = false;
-					for (var i = 0; i < items.length; i++) {
-						if (items[i] == this._selectedMenuItem) {
-							found = i;
-							break;
-						}
-					}
-					if (found !== false) {
-						newPos = (relPos > 0 ? (found + relPos) : (items.length + found + relPos) ) % items.length;
-						this._selectedMenuItem = items[newPos];
-					} else {
-						this._selectedMenuItem = items[(relPos > 0 ? 0 : items.length - 1)];
-					}
-				}
-				if (this._selectedMenuItem) {
-					this._deselectShortcuts();
-					this._selectMenuItem(this._selectedMenuItem);
-				}
-			},
-			
-			/**
-			 * Opens up a menu item or shortcut (and all parent menus).
-			 *
-			 * @private
-			 * @param {HTMLElement} item The menu item to select.
-			 */
-			_selectMenuItem: function (item) {
-				this._selectedMenuItem = item;
-				if (this._isShortcut(item)) {
-					item.className = item.className.replace(/\s*\bselected\b/i, '');
-					item.className += ' selected';
-					this._selectedShortcuts.push(item);
-				}
-				
-				var node = item.parentNode;
-				var toSelect = item.getAttribute(this.valueAttr);
-				while (node) {
-					if (node.tagName && this._isSubMenu(node)) {
-						if (node.selected == toSelect)
-							break;
-						node.selected = toSelect;
-						toSelect = node.getAttribute(this.valueAttr);
-					}
-					if (window.ShadowRoot && node instanceof ShadowRoot) {
-						break; // don't cross shadow root
-					}
-					
-					node = node.parentNode;
-				}
-			},
-			
-			/**
-			 * Deselects all shortcut items.
-			 * @private
-			 */
-			_deselectShortcuts: function () {
-				for (var i = 0; i < this._selectedShortcuts.length; i++) {
-					var item = this._selectedShortcuts[i];
-					item.className = item.className.replace(/\s*\bselected\b/i, '');
-				}
-				this._selectedShortcuts = [];
-			},
-			
-			/**
-			 * Checks if the specified item is a submenu.
-			 *
-			 * @private
-			 * @param {HTMLElement} item The item to check.
-			 */
-			_isSubMenu: function (item) {
-				return item.tagName == 'CORE-SUBMENU' || item.tagName == 'CORE-MENU';
-			},
-			
-			/**
-			 * Checks if the specified item is a shortcut.
-			 *
-			 * @private
-			 * @param {HTMLElement} item The item to check.
-			 */
-			_isShortcut: function (item) {
-				return !!item.className.match(/\bshortcut\b/i);
-			}
-			
-		});
-	</script>
-</polymer-element>
+<!--
+`<paper-menu>` implements an accessible menu control with Material Design styling. The focused item
+is highlighted, and the selected item has bolded text.
+
+    <paper-menu>
+      <paper-item>Item 1</paper-item>
+      <paper-item>Item 2</paper-item>
+    </paper-menu>
+
+An initial selection can be specified with the `selected` attribute.
+
+    <paper-menu selected="0">
+      <paper-item>Item 1</paper-item>
+      <paper-item>Item 2</paper-item>
+    </paper-menu>
+
+Make a multi-select menu with the `multi` attribute. Items in a multi-select menu can be deselected,
+and multiple item can be selected.
+
+    <paper-menu multi>
+      <paper-item>Item 1</paper-item>
+      <paper-item>Item 2</paper-item>
+    </paper-menu>
+
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-menu-background-color`   | Menu background color                                            | `--primary-background-color`
+`--paper-menu-color`               | Menu foreground color                                            | `--primary-text-color`
+`--paper-menu-disabled-color`     | Foreground color for a disabled item                             | `--disabled-text-color`
+`--paper-menu`                    | Mixin applied to the menu                                        | `{}`
+`--paper-menu-selected-item`      | Mixin applied to the selected item                               | `{}`
+`--paper-menu-focused-item`       | Mixin applied to the focused item                                | `{}`
+`--paper-menu-focused-item-after` | Mixin applied to the ::after pseudo-element for the focused item | `{}`
+
+### Accessibility
+
+`<paper-menu>` has `role="menu"` by default. A multi-select menu will also have
+`aria-multiselectable` set. It implements key bindings to navigate through the menu with the up and
+down arrow keys, esc to exit the menu, and enter to activate a menu item. Typing the first letter
+of a menu item will also focus it.
+
+@group Paper Elements
+@element paper-menu
+@hero hero.svg
+@demo demo/index.html
+-->
+
+<dom-module id="cbn-app-menu">
+  <link rel="import" type="css" href="cbn-app-menu.css">
+
+  <style>
+    :host {
+      display: block;
+      padding: 8px 0;
+
+      background: var(--paper-menu-background-color, --primary-background-color);
+      color: var(--paper-menu-color, --primary-text-color);
+
+      @apply(--paper-menu);
+    }
+  </style>
+  <template>
+
+    <div class="selectable-content horizontal layout wrap">
+      <content></content>
+    </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+(function() {
+
+  Polymer({
+
+    is: 'cbn-app-menu',
+
+    behaviors: [
+      Polymer.IronMenuBehavior
+    ]
+
+  });
+
+})();
+
+</script>
