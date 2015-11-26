@@ -57,12 +57,12 @@
 			}
 		</style>
 		<cbn-app-menu class="menu-content sublist" id="generalMenu" attr-for-selected="data-route" selected="{{route}}" selected-class="selected-item-menu">
-			<paper-item class="item-menu item-min-height item-list flex" data-route$="{{listRoute}}">
+			<paper-item class="item-menu item-min-height flex" data-route$="{{listRoute}}" on-tap="_pageShow">
 				<iron-icon icon="{{icon}}" class="icon-menu"></iron-icon>
 				<span class="title-menu flex" style="width:0px;overflow: hidden"><content></content></span>
 			</paper-item>
 			<template is="dom-if" if="{{_hasAddRoute(addRoute)}}">
-				<paper-item class="item-menu item-min-height item-add" data-route$="{{addRoute}}">
+				<paper-item class="item-menu item-min-height item-add" data-route$="{{addRoute}}" on-tap="_pageShow">
 					<iron-icon icon="add" class="icon-menu"></iron-icon>
 				</paper-item>
 			</template>
@@ -132,6 +132,11 @@
 					return false;
 				}
 				return true;
+			},
+			_pageShow: function(event){
+				if(page && page.show) {
+					page.show(event.currentTarget.getAttribute("data-route"));
+				}
 			}
 		})
 	})();
