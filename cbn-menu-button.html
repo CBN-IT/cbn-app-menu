@@ -37,6 +37,7 @@
 			}
 			.item-menu{
 				padding: 0 8px;
+				cursor: pointer;
 			}
 			.item-add {
 				width:22px;
@@ -137,8 +138,8 @@
 				return true;
 			},
 			_pageShow: function(event){
-				if(page && page.show) {
-					page.show(event.currentTarget.getAttribute("data-route"));
+				if(window.page && window.page.show) {
+					window.page.show(event.currentTarget.getAttribute("data-route"));
 				}
 			}
 		})
