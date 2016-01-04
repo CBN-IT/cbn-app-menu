@@ -118,6 +118,17 @@
 				},
 
 				/**
+				 * the route to be used for main action
+				 */
+				noPageShow: {
+					type: Boolean,
+					value: false,
+					notify: false,
+					readOnly: false,
+					reflectToAttribute: false
+				},
+
+				/**
 				 * To propagate the route to the buttons
 				 */
 				route: {
@@ -143,7 +154,7 @@
 				return true;
 			},
 			_pageShow: function(event){
-				if(window.page && window.page.show) {
+				if(window.page && window.page.show && !this.noPageShow) {
 					window.page.show(event.currentTarget.getAttribute("data-route"));
 				}
 			}
