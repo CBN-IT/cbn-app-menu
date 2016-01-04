@@ -23,6 +23,11 @@
 			:host {
 				display: block;
 			}
+			:host(.submenu){
+				--cbn-menu-button-item-list-icon:{
+					margin-left: 10px;
+				};
+			}
 			#generalMenu{
 				padding-top: 0;
 				padding-bottom: 0;
@@ -57,7 +62,7 @@
 				border-left: 3px solid #80a3ed;
 			}
 			.item-list iron-icon {
-				margin-left: var(--margin-left);
+				@apply(--cbn-menu-button-item-list-icon)
 			}
 		</style>
 		<cbn-app-menu class="menu-content sublist" id="generalMenu" attr-for-selected="data-route" selected="{{route}}" selected-class="selected-item-menu">
