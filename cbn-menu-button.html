@@ -17,16 +17,19 @@
 @class cbn-menu-button
 -->
 
+<style is="custom-style">
+	/*it doesn't work with :host(.submenu)*/
+	cbn-menu-button.submenu {
+		--cbn-menu-button-item-list-icon: {
+			margin-left: 10px;
+		}
+	}
+</style>
 <dom-module id="cbn-menu-button">
 	<template>
 		<style is="custom-style">
 			:host {
 				display: block;
-			}
-			:host{
-				--cbn-menu-button-item-list-icon:{
-					margin-left: 10px;
-				};
 			}
 			#generalMenu{
 				padding-top: 0;
