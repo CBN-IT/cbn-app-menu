@@ -35,10 +35,20 @@
 				padding-top: 0;
 				padding-bottom: 0;
 			}
-			#generalMenu .item-menu:hover{
-				background-color: #ecf1fd;
+			#generalMenu[is-selected="da"] .item-menu:first-child,
+			#generalMenu:hover .item-menu:first-child{
 				color: #3277ec;
-				border-left: 3px solid #80a3ed;
+				border-left: 3px solid #4285F4;
+			}
+			#generalMenu .item-menu:hover{
+				color: #3277ec;
+				background-color: #ADCBFB;
+				border-left: 3px solid #4285F4;
+			}
+			#generalMenu .item-menu.selected-item-menu{
+				color:#4285F4;
+				background-color: #C5DAFB;
+				border-left: 3px solid #4285F4;
 			}
 			#generalMenu .item-menu{
 				border-left: 3px solid white;
@@ -59,16 +69,11 @@
 			.item-min-height{
 				min-height: 35px;
 			}
-			#generalMenu paper-item.selected-item-menu{
-				color:#4285F4;
-				background-color: #ecf1fd;
-				border-left: 3px solid #80a3ed;
-			}
 			.item-list iron-icon {
 				@apply(--cbn-menu-button-item-list-icon)
 			}
 		</style>
-		<cbn-app-menu class="menu-content sublist" id="generalMenu" attr-for-selected="data-route" selected="{{route}}" selected-class="selected-item-menu">
+		<cbn-app-menu class="menu-content sublist" is-selected$="{{_isSelected(route, listRoute, addRoute)}}" id="generalMenu" attr-for-selected="data-route" selected="{{route}}" selected-class="selected-item-menu">
 			<paper-item class="item-menu item-min-height flex item-list" data-route$="{{listRoute}}" on-tap="_pageShow">
 				<iron-icon icon="{{icon}}" class="icon-menu"></iron-icon>
 				<span class="title-menu flex" style="width:0px;overflow: hidden"><content></content></span>
@@ -98,7 +103,16 @@
 					readOnly: false,
 					reflectToAttribute: false
 				},
-
+				/**
+				 * To propagate the route to the buttons
+				 */
+				route: {
+					type: String,
+					value: "",
+					notify: true,
+					readOnly: false,
+					reflectToAttribute: false
+				},
 				/**
 				 * the route to be used for main action
 				 */
@@ -119,7 +133,6 @@
 					readOnly: false,
 					reflectToAttribute: false
 				},
-
 				/**
 				 * the route to be used for main action
 				 */
@@ -129,34 +142,28 @@
 					notify: false,
 					readOnly: false,
 					reflectToAttribute: false
-				},
-
-				/**
-				 * To propagate the route to the buttons
-				 */
-				route: {
-					type: String,
-					value: "",
-					notify: true,
-					readOnly: false,
-					reflectToAttribute: false
 				}
-				
-
 			},
 			observers: [],
 			ready: function () {
 			},
 			_hasAddRoute: function () {
-				if (this.addRoute === null ||
-					this.addRoute === undefined ||
-					this.addRoute === "") {
-
-					return false;
+				return !(this.addRoute === null ||
+				this.addRoute === undefined ||
+				this.addRoute === "");
+				
+			},
+			_isSelected: function(route, listRoute, addRoute){
+				if (route != "" && (route == listRoute || route == addRoute)) {
+					return "da";
 				}
-				return true;
+				return "nu";
 			},
 			_pageShow: function(event){
+				var t = event.currentTarget;
+				this.async(function(){
+					t.blur();
+				}, 50);
 				if(window.page && window.page.show && !this.noPageShow) {
 					window.page.show(event.currentTarget.getAttribute("data-route"));
 				}
