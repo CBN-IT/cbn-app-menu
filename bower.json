@@ -1,6 +1,16 @@
 {
     "name": "cbn-app-menu",
-    "version": "0.1.0",
+    "version": "1.0.0",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "../",
+        "test",
+        "tests",
+        "src",
+        "demo"
+    ],
     "dependencies": {
         "iron-menu-behavior": "PolymerElements/iron-menu-behavior#^1.0.0",
         "paper-styles": "PolymerElements/paper-styles#^1.0.0",
