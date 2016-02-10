@@ -166,7 +166,26 @@
 				this.async(function () {
 					t.blur();
 				}, 50);
-
+				var oldRoute = this.route;
+				var newRoute = event.currentTarget.getAttribute("data-route");
+				if (newRoute == oldRoute) {
+					var ev = this.fire("iron-activate", {
+						item: event.currentTarget,
+						selected: newRoute
+					}, {
+						cancelable: true,
+						bubbles: true,
+						node: this
+					});
+					if (ev.defaultPrevented) {
+						return;
+					}
+					this.fire("iron-select", {
+						item: event.currentTarget
+					});
+					this.routeChanged();
+					
+				}
 			},
 			routeChanged: function () {
 				if (this._isSelected(this.route, this.listRoute, this.addRoute) == "da") {
