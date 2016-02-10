@@ -24,13 +24,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 	<link rel="import" href="../cbn-menu-button.html">
 </head>
 <body unresolved>
-<template is="dom-bind">
-	<div style="width:200px;display:inline-block;">
+<template id="first" is="dom-bind">
+	<div style="width:210px;display:inline-block;">
 		<cbn-menu-button route="{{route}}" icon="home" list-route="/Contracte" add-route="/add/Contracte">Contracte</cbn-menu-button>
 		<cbn-menu-button route="{{route}}" icon="home" list-route="/Arendatori" add-route="/add/Arendatori">Arendatori</cbn-menu-button>
 		<cbn-menu-button route="{{route}}" icon="home" list-route="/Suprafete" add-route="/add/Suprafete">Suprafete</cbn-menu-button>
+		<cbn-menu-button on-iron-activate="checkSaved" route="{{route}}" icon="home" list-route="/P" add-route="/add/p">Prevent Default</cbn-menu-button>
 		<cbn-menu-button route="{{route}}" icon="home" list-route="/Settings" class="submenu">Settings</cbn-menu-button>
 	</div>
 </template>
+<script>
+	window.addEventListener('WebComponentsReady', function () {
+		first.checkSaved=function(e){
+			e.preventDefault();
+		}
+	});
+</script>
 </body>
 </html>
