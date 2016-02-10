@@ -153,24 +153,24 @@
 				return !(this.addRoute === null ||
 				this.addRoute === undefined ||
 				this.addRoute === "");
-				
+
 			},
-			_isSelected: function(route, listRoute, addRoute){
+			_isSelected: function (route, listRoute, addRoute) {
 				if (route != "" && (route == listRoute || route == addRoute)) {
 					return "da";
 				}
 				return "nu";
 			},
-			_pageShow: function(event){
+			_pageShow: function (event) {
 				var t = event.currentTarget;
-				this.async(function(){
+				this.async(function () {
 					t.blur();
 				}, 50);
-				
+
 			},
-			routeChanged:function(){
-				if(this._isSelected(this.route,this.listRoute, this.addRoute) == "da"){
-					if(window.page && window.page.show && !this.noPageShow) {
+			routeChanged: function () {
+				if (this._isSelected(this.route, this.listRoute, this.addRoute) == "da") {
+					if (window.page && window.page.show && !this.noPageShow) {
 						window.page.show(this.route);
 					}
 				}
