@@ -25,7 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </head>
 <body unresolved>
 <template id="first" is="dom-bind">
-	<div style="width:210px;display:inline-block;">
+	<div style="width:210px;display:inline-block;" on-iron-activate="logEvent" on-iron-select="logEvent" on-iron-deselect="logEvent">
 		<cbn-menu-button route="{{route}}" icon="home" list-route="/Contracte" add-route="/add/Contracte">Contracte</cbn-menu-button>
 		<cbn-menu-button route="{{route}}" icon="home" list-route="/Arendatori" add-route="/add/Arendatori">Arendatori</cbn-menu-button>
 		<cbn-menu-button route="{{route}}" icon="home" list-route="/Suprafete" add-route="/add/Suprafete">Suprafete</cbn-menu-button>
@@ -35,8 +35,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </template>
 <script>
 	window.addEventListener('WebComponentsReady', function () {
-		first.checkSaved=function(e){
+		first.checkSaved = function (e) {
 			e.preventDefault();
+		};
+		first.logEvent = function (event) {
+			console.log(event.type, event.detail);
 		}
 	});
 </script>

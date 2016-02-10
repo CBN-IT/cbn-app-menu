@@ -74,7 +74,7 @@
 				@apply(--cbn-menu-button-item-list-icon)
 			}
 		</style>
-		<cbn-app-menu class="menu-content sublist" is-selected$="{{_isSelected(route, listRoute, addRoute)}}" id="generalMenu" attr-for-selected="data-route" selected="{{route}}" selected-class="selected-item-menu">
+		<cbn-app-menu class="menu-content sublist" is-selected$="{{_isSelected(route, listRoute, addRoute)}}" id="generalMenu" on-iron-activate="stopPropagation" attr-for-selected="data-route" selected="{{route}}" selected-class="selected-item-menu">
 			<paper-item class="item-menu item-min-height flex item-list" data-route$="{{listRoute}}" on-tap="_pageShow">
 				<iron-icon icon="{{icon}}" class="icon-menu"></iron-icon>
 				<span class="title-menu flex" style="width:0px;overflow: hidden"><content></content></span>
@@ -166,33 +166,35 @@
 				this.async(function () {
 					t.blur();
 				}, 50);
-				var oldRoute = this.route;
-				var newRoute = event.currentTarget.getAttribute("data-route");
-				if (newRoute == oldRoute) {
-					var ev = this.fire("iron-activate", {
-						item: event.currentTarget,
-						selected: newRoute
-					}, {
-						cancelable: true,
-						bubbles: true,
-						node: this
-					});
-					if (ev.defaultPrevented) {
-						return;
-					}
-					this.fire("iron-select", {
-						item: event.currentTarget
-					});
-					this.routeChanged();
-					
-				}
 			},
 			routeChanged: function () {
 				if (this._isSelected(this.route, this.listRoute, this.addRoute) == "da") {
+					console.log("routeChanged");
 					if (window.page && window.page.show && !this.noPageShow) {
 						window.page.show(this.route);
 					}
 				}
+			},
+			stopPropagation: function(event){
+				event.stopImmediatePropagation();
+				var ev = this.fire(event.type, event.detail,{
+					cancelable: true,
+					bubbles: true,
+					node: this
+				});
+				if (ev.defaultPrevented) {
+					event.preventDefault();
+					return;
+				}
+				var oldRoute = this.route;
+				var newRoute = event.detail.selected;
+				if (newRoute == oldRoute) {
+					this.routeChanged();
+					this.fire("iron-select", {
+						item: event.currentTarget
+					});
+				}
+
 			}
 		})
 	})();
