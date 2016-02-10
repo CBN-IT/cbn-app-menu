@@ -112,7 +112,8 @@
 					value: "",
 					notify: true,
 					readOnly: false,
-					reflectToAttribute: false
+					reflectToAttribute: false,
+					observer:"routeChanged"
 				},
 				/**
 				 * the route to be used for main action
@@ -165,8 +166,13 @@
 				this.async(function(){
 					t.blur();
 				}, 50);
-				if(window.page && window.page.show && !this.noPageShow) {
-					window.page.show(event.currentTarget.getAttribute("data-route"));
+				
+			},
+			routeChanged:function(){
+				if(this._isSelected(this.route,this.listRoute, this.addRoute) == "da"){
+					if(window.page && window.page.show && !this.noPageShow) {
+						window.page.show(this.route);
+					}
 				}
 			}
 		})
