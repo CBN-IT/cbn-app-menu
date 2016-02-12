@@ -112,8 +112,7 @@
 					value: "",
 					notify: true,
 					readOnly: false,
-					reflectToAttribute: false,
-					observer:"routeChanged"
+					reflectToAttribute: false
 				},
 				/**
 				 * the route to be used for main action
@@ -175,9 +174,9 @@
 					}
 				}
 			},
-			stopPropagation: function(event){
+			stopPropagation: function (event) {
 				event.stopImmediatePropagation();
-				var ev = this.fire(event.type, event.detail,{
+				var ev = this.fire(event.type, event.detail, {
 					cancelable: true,
 					bubbles: true,
 					node: this
@@ -188,13 +187,14 @@
 				}
 				var oldRoute = this.route;
 				var newRoute = event.detail.selected;
-				if (newRoute == oldRoute) {
+				this.async(function () {
+					if (newRoute == oldRoute) {
+						this.fire("iron-select", {
+							item: event.currentTarget
+						});
+					}
 					this.routeChanged();
-					this.fire("iron-select", {
-						item: event.currentTarget
-					});
-				}
-
+				});
 			}
 		})
 	})();
