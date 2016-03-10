@@ -1,0 +1,201 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../cbn-app-menu/cbn-app-menu.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+
+<!--
+`cbn-menu-button` 
+
+    <cbn-menu-button></cbn-menu-button>
+
+### Validation
+
+### Styling
+
+@demo demo/index.html
+@class cbn-menu-button
+-->
+
+<style is="custom-style">
+	/*it doesn't work with :host(.submenu)*/
+	cbn-menu-button.submenu {
+		--cbn-menu-button-item-list-icon: {
+			margin-left: 10px;
+		}
+	}
+</style>
+<dom-module id="cbn-menu-button">
+	<template>
+		<style is="custom-style">
+			:host {
+				display: block;
+			}
+			#generalMenu{
+				padding-top: 0;
+				padding-bottom: 0;
+			}
+			#generalMenu[is-selected="da"] .item-menu:first-child,
+			#generalMenu:hover .item-menu:first-child{
+				color: #3277ec;
+				border-left: 3px solid #4285F4;
+			}
+			#generalMenu .item-menu:hover{
+				color: #3277ec;
+				background-color: #ADCBFB;
+				border-left: 3px solid #4285F4;
+			}
+			#generalMenu .item-menu.selected-item-menu{
+				color:#4285F4;
+				background-color: #C5DAFB;
+				border-left: 3px solid #4285F4;
+			}
+			#generalMenu .item-menu{
+				border-left: 3px solid white;
+			}
+			.item-menu{
+				padding: 0 8px;
+				cursor: pointer;
+			}
+			.item-add {
+				width:22px;
+			}
+			.icon-submenu{
+				padding-left: 20px;
+			}
+			.title-menu{
+				margin-left: 11px;
+				overflow:hidden;
+			}
+			.item-min-height{
+				min-height: 35px;
+			}
+			.item-list iron-icon {
+				@apply(--cbn-menu-button-item-list-icon)
+			}
+		</style>
+		<cbn-app-menu class="menu-content sublist" is-selected$="{{_isSelected(route, listRoute, addRoute)}}" id="generalMenu" on-iron-activate="stopPropagation" attr-for-selected="data-route" selected="{{route}}" selected-class="selected-item-menu">
+			<paper-item class="item-menu item-min-height flex item-list" data-route$="{{listRoute}}" on-tap="_pageShow">
+				<iron-icon icon="{{icon}}" class="icon-menu"></iron-icon>
+				<span class="title-menu flex" style="width:0px;overflow: hidden"><content></content></span>
+			</paper-item>
+			<template is="dom-if" if="{{_hasAddRoute(addRoute)}}">
+				<paper-item class="item-menu item-min-height item-add" data-route$="{{addRoute}}" on-tap="_pageShow">
+					<iron-icon icon="add" class="icon-menu"></iron-icon>
+				</paper-item>
+			</template>
+		</cbn-app-menu>
+	</template>
+</dom-module>
+
+<script>
+	(function () {
+		Polymer({
+			is: 'cbn-menu-button',
+			behaviors: [],
+			properties: {
+				/**
+				 * the icon to be used with the button
+				 */
+				icon: {
+					type: String,
+					value: "",
+					notify: false,
+					readOnly: false,
+					reflectToAttribute: false
+				},
+				/**
+				 * To propagate the route to the buttons
+				 */
+				route: {
+					type: String,
+					value: "",
+					notify: true,
+					readOnly: false,
+					reflectToAttribute: false
+				},
+				/**
+				 * the route to be used for main action
+				 */
+				listRoute: {
+					type: String,
+					value: "",
+					notify: false,
+					readOnly: false,
+					reflectToAttribute: false
+				},
+				/**
+				 * the route to be used for main action
+				 */
+				addRoute: {
+					type: String,
+					value: "",
+					notify: false,
+					readOnly: false,
+					reflectToAttribute: false
+				},
+				/**
+				 * the route to be used for main action
+				 */
+				noPageShow: {
+					type: Boolean,
+					value: false,
+					notify: false,
+					readOnly: false,
+					reflectToAttribute: false
+				}
+			},
+			observers: [],
+			ready: function () {
+			},
+			_hasAddRoute: function () {
+				return !(this.addRoute === null ||
+				this.addRoute === undefined ||
+				this.addRoute === "");
+
+			},
+			_isSelected: function (route, listRoute, addRoute) {
+				if (route != "" && (route == listRoute || route == addRoute)) {
+					return "da";
+				}
+				return "nu";
+			},
+			_pageShow: function (event) {
+				var t = event.currentTarget;
+				this.async(function () {
+					t.blur();
+				}, 50);
+			},
+			routeChanged: function () {
+				if (this._isSelected(this.route, this.listRoute, this.addRoute) == "da") {
+					console.log("routeChanged");
+					if (window.page && window.page.show && !this.noPageShow) {
+						window.page.show(this.route);
+					}
+				}
+			},
+			stopPropagation: function (event) {
+				event.stopImmediatePropagation();
+				var ev = this.fire(event.type, event.detail, {
+					cancelable: true,
+					bubbles: true,
+					node: this
+				});
+				if (ev.defaultPrevented) {
+					event.preventDefault();
+					return;
+				}
+				var oldRoute = this.route;
+				var newRoute = event.detail.selected;
+				this.async(function () {
+					if (newRoute == oldRoute) {
+						this.fire("iron-select", {
+							item: event.currentTarget
+						});
+					}
+					this.routeChanged();
+				});
+			}
+		})
+	})();
+</script>

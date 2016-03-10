@@ -1,84 +1,47 @@
 <!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
 <html>
 <head>
-	<meta charset="utf-8" />
-	<title>Material Demo App</title>
-	<meta name="description" content="" />
-	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no" />
-	
-	<script src="../../webcomponentsjs/webcomponents.js"></script>
-	
-	<link rel="import" href="include/common.html" />
-	
-	<link rel="stylesheet" href="css/app.css" />
-	<link rel="stylesheet" href="css/app-menu.css" />
-	<link rel="stylesheet" href="css/common.css" />
-	
+
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+
+	<title>cbn-app-menu demo</title>
+
+	<script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+	<link rel="import" href="../cbn-app-menu.html">
+	<link rel="import" href="../cbn-app-submenu.html">
+	<link rel="import" href="../cbn-menu-button.html">
 </head>
-<body unresolved fullbleed layout vertical>
-
-<template id="app" is="auto-binding">
-	
-	<core-header-panel flex>
-		<core-toolbar id="appTopBar">
-			<core-icon-button icon="menu"></core-icon-button>
-			<div flex>Material App</div>
-		</core-toolbar>
-		
-		<core-drawer-panel drawerWidth="230px" flex>
-			
-			<div drawer id="appMenuContainer">
-				
-				<cbn-app-menu valueAttr="href" routerAdapter="{{appRouterAdapter}}">
-					<core-menu class="app-menu">
-						<div class="caption">Main Menu</div>
-						<core-item href="/" class="menu-item" icon="image:image" label="Home"></core-item>
-						
-						<div class="caption">Objects</div>
-						
-						<core-submenu href="/users" icon="image:image" label="Users">
-							<paper-fab href="/users/add" class="item-content shortcut" icon="add"></paper-fab>
-							
-							<core-item href="/users" class="submenu-item" label="Display"></core-item>
-							<core-item href="/users/add" class="submenu-item" label="Add"></core-item>
-							<core-item href="/users/export" class="submenu-item" label="Export"></core-item>
-						</core-submenu>
-						
-						<core-item href="/cats" class="menu-item" icon="image:image" label="Cats">
-							<paper-fab href="/cats/add" class="shortcut" icon="add"></paper-fab>
-						</core-item>
-					</core-menu>
-				</cbn-app-menu>
-				
-			</div>
-			
-			<div main id="appMainContainer">
-				
-				<!-- Application route-page mappings -->
-				<app-router init="manual" mode="hash" trailingSlash="ignore">
-					
-					<app-route path="/" element="app-page-dummy"></app-route>
-					
-					<app-route path="/users" element="app-page-users"></app-route>
-					<app-route path="/users/add" element="app-page-users-add"></app-route>
-					<app-route path="/users/export" element="app-page-users"></app-route>
-					
-					<app-route path="/cats" element="app-page-dummy"></app-route>
-					<app-route path="/cats/add" element="app-page-dummy"></app-route>
-					
-					<!-- Default route - redirect to home page -->
-					<app-route path="*" redirect="/"></app-route>
-					
-				</app-router>
-				
-			</div>
-			
-		</core-drawer-panel>
-	</core-header-panel>
-	
+<body unresolved>
+<template id="first" is="dom-bind">
+	<div style="width:210px;display:inline-block;" on-iron-activate="logEvent" on-iron-select="logEvent" on-iron-deselect="logEvent">
+		<cbn-menu-button route="{{route}}" icon="home" list-route="/Contracte" add-route="/add/Contracte">Contracte</cbn-menu-button>
+		<cbn-menu-button route="{{route}}" icon="home" list-route="/Arendatori" add-route="/add/Arendatori">Arendatori</cbn-menu-button>
+		<cbn-menu-button route="{{route}}" icon="home" list-route="/Suprafete" add-route="/add/Suprafete">Suprafete</cbn-menu-button>
+		<cbn-menu-button on-iron-activate="checkSaved" route="{{route}}" icon="home" list-route="/P" add-route="/add/p">Prevent Default</cbn-menu-button>
+		<cbn-menu-button route="{{route}}" icon="home" list-route="/Settings" class="submenu">Settings</cbn-menu-button>
+	</div>
 </template>
-
-<script src="app.js"></script>
-
+<script>
+	window.addEventListener('WebComponentsReady', function () {
+		first.checkSaved = function (e) {
+			e.preventDefault();
+		};
+		first.logEvent = function (event) {
+			console.log(event.type, event.detail);
+		}
+	});
+</script>
 </body>
 </html>
