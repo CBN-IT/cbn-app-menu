@@ -161,6 +161,7 @@
 				return "nu";
 			},
 			_pageShow: function (event) {
+				document.querySelector("paper-drawer-panel").selected = "main";
 				var t = event.currentTarget;
 				this.async(function () {
 					t.blur();
