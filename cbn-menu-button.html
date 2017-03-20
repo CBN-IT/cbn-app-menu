@@ -23,11 +23,12 @@
 		<style is="custom-style">
 			:host {
 				display: block;
+				border-top: var(--cbn-menu-button-border-top);
 			}
 			:host(.submenu) {
 				--cbn-menu-button-item-list-icon: {
 					margin-left: 10px;
-				}
+				};
 			}
 			#generalMenu{
 				padding-top: 0;
@@ -35,25 +36,27 @@
 			}
 			#generalMenu[is-selected="da"] .item-menu:first-child,
 			#generalMenu:hover .item-menu:first-child{
-				color: #3277ec;
-				border-left: 3px solid #4285F4;
+				color: var(--cbn-menu-button-background-color, #3277ec);
+				border-left: 3px solid var(--cbn-menu-button-border-color, #4285F4);
 			}
 			#generalMenu .item-menu:hover{
-				color: #3277ec;
-				background-color: #ADCBFB;
-				border-left: 3px solid #4285F4;
+				color: var(--cbn-menu-button-background-color, #3277ec);
+				background-color: var(--cbn-menu-button-color, #ADCBFB);;
+				border-left: 3px solid var(--cbn-menu-button-border-color, #4285F4);
 			}
 			#generalMenu .item-menu.selected-item-menu{
-				color:#4285F4;
-				background-color: #C5DAFB;
-				border-left: 3px solid #4285F4;
+				color:var(--cbn-menu-button-background-color, #4285F4);
+				background-color: var(--cbn-menu-button-color, #C5DAFB);;
+				border-left: 3px solid var(--cbn-menu-button-border-color, #4285F4);
 			}
 			#generalMenu .item-menu{
-				border-left: 3px solid white;
+				border-left: 3px solid var(--cbn-menu-button-background-color, white);
 			}
 			.item-menu{
 				padding: 0 8px;
 				cursor: pointer;
+				background: var(--cbn-menu-button-background-color, white);
+				color: var(--cbn-menu-button-text-color);
 			}
 			.item-add {
 				width:22px;
