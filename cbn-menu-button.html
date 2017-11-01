@@ -144,6 +144,13 @@
 					notify: false,
 					readOnly: false,
 					reflectToAttribute: false
+				},
+				
+				namespace: {
+				    type: String,
+					value: function(){
+				        return window.namespace;
+					}
 				}
 			},
 			observers: [],
@@ -172,7 +179,7 @@
 				if (this._isSelected(this.route, this.listRoute, this.addRoute) == "da") {
 					console.log("routeChanged");
 					if (window.page && window.page.show && !this.noPageShow) {
-						window.page.show(this.route);
+						window.page.show(this.route + "?namespace=" + this.namespace);
 					}
 				}
 			},
